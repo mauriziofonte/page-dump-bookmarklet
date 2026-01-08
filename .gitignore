@@ -1,0 +1,5 @@
+node_modules/
+*.html
+*-TEST.md
+.DS_Store
+*.log

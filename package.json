@@ -1,0 +1,33 @@
+{
+  "name": "pagedump",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "./build.js"
+  },
+  "type": "module",
+  "homepage": "https://github.com/mauriziofonte/page-dump-bookmarklet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mauriziofonte/page-dump-bookmarklet.git"
+  },
+  "keywords": [
+    "bookmarklet",
+    "markdown",
+    "web-scraping",
+    "content-extraction",
+    "html-to-markdown"
+  ],
+  "author": "Maurizio Fonte (https://www.mauriziofonte.it/)",
+  "license": "MIT",
+  "description": "A browser bookmarklet to extract the main content from any web page and export it to Markdown, HTML, or plain text formats.",
+  "dependencies": {
+    "copy-to-clipboard": "^3.3.3",
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-bookmarklet": "^1.0.0",
+    "slugify": "^1.6.6",
+    "toastify-js": "^1.12.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}
