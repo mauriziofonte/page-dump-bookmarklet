@@ -76,9 +76,9 @@ const TAG_SCORE_MALUS = {
 // Regex patterns for class/id scoring
 const REGEX_POSITIVE = /article|body|content|entry|main|page|post|text|blog|story|hentry/i
 const REGEX_NEGATIVE =
-	/comment|sidebar|side-bar|ads?|sponsor|nav|breadcrumb|promo|footer|header|menu|widget|banner|related|share|social|popup|modal/i
+	/comment|sidebar|side-bar|ads?|sponsor|nav|breadcrumb|promo|footer|header|menu|widget|banner|related|share|social|popup|modal|cookie|consent|gdpr|cky-|onetrust/i
 const REGEX_UNLIKELY =
-	/-ad-|ai2html|banner|breadcrumbs|combx|comment|disqus|extra|gdpr|legends|menu|remark|replies|rss|shoutbox|skyscraper|supplemental|ad-break|agegate|pagination|pager|popup/i
+	/-ad-|ai2html|banner|breadcrumbs|combx|comment|disqus|extra|gdpr|legends|menu|remark|replies|rss|shoutbox|skyscraper|supplemental|ad-break|agegate|pagination|pager|popup|cookie|consent|cky-|onetrust|cmplz|iubenda|cookiebot|didomi|tarteaucitron|quantcast|usercentrics|osano|klaro|axeptio|trustarc/i
 
 /**
  * Extracts the main content node from the document.
@@ -195,6 +195,35 @@ function _tryDomainOverride(root, hostname) {
 	return null
 }
 
+// Selectors for cookie/consent/privacy banners to remove directly
+const COOKIE_CONSENT_SELECTORS = [
+	// CookieYes
+	'[data-cky-tag]',
+	'.cky-consent-container',
+	'.cky-modal',
+	// OneTrust
+	'#onetrust-consent-sdk',
+	// Cookiebot
+	'#CybotCookiebotDialog',
+	// Generic patterns (covers most cases)
+	'[id*="cookie-banner"]',
+	'[id*="cookie-consent"]',
+	'[id*="gdpr"]',
+	'[class*="cookie-banner"]',
+	'[class*="cookie-consent"]',
+	// Other major CMPs
+	'#cmplz-cookiebanner-container',
+	'.iubenda-cs-container',
+	'.qc-cmp2-container',
+	'#didomi-host',
+	'#tarteaucitronRoot',
+	'#usercentrics-root',
+	'.klaro',
+	// ARIA-based detection
+	'[role="dialog"][aria-label*="cookie" i]',
+	'[role="dialog"][aria-label*="consent" i]',
+].join(',')
+
 /**
  * Phase 1: Remove nodes that are clearly not content
  * @param {Element} root
@@ -205,10 +234,25 @@ function _removeUnwantedNodes(root) {
 		root.querySelectorAll(tag).forEach((el) => el.remove())
 	})
 
-	// Remove hidden elements
+	// Remove cookie consent/privacy banners (before other checks)
+	root.querySelectorAll(COOKIE_CONSENT_SELECTORS).forEach((el) => el.remove())
+
+	// Remove hidden elements (but preserve content-rich ones like FAQ accordions)
 	root.querySelectorAll(
 		'[hidden], [aria-hidden="true"], [style*="display:none"], [style*="display: none"], [style*="visibility:hidden"], [style*="visibility: hidden"]',
-	).forEach((el) => el.remove())
+	).forEach((el) => {
+		const text = el.textContent.trim()
+		const hasContentTags = el.querySelector('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, code, table')
+		if (text.length >= 50 && hasContentTags) {
+			// Preserve element, just unhide it
+			el.removeAttribute('hidden')
+			el.removeAttribute('aria-hidden')
+			if (el.style.display === 'none') el.style.display = ''
+			if (el.style.visibility === 'hidden') el.style.visibility = ''
+		} else {
+			el.remove()
+		}
+	})
 
 	// Remove by unlikely class/id patterns (but not main containers)
 	const mainTags = ['BODY', 'HTML', 'MAIN', 'ARTICLE']
