@@ -95,12 +95,16 @@ export const StackOverflowParser = {
     },
 }
 
-export const DOMAIN_PARSERS = {
+const DOMAIN_PARSERS = {
     'stackoverflow.com': StackOverflowParser,
     'stackexchange.com': StackOverflowParser,
     'superuser.com': StackOverflowParser,
     'serverfault.com': StackOverflowParser,
     'askubuntu.com': StackOverflowParser,
+}
+
+export function registerParser(domain, parser) {
+    DOMAIN_PARSERS[domain] = parser
 }
 
 export function getDomainParser(hostname) {

@@ -146,11 +146,16 @@ function _tryStructuredParser(root, hostname) {
 	const wrapper = document.createElement('div')
 	wrapper.innerHTML = html
 
-	return {
+	const result = {
 		element: wrapper,
 		html: html,
 		text: wrapper.textContent.trim(),
 	}
+	if (typeof parser.filename === 'function') {
+		const fn = parser.filename(posts)
+		if (fn) result.filename = fn
+	}
+	return result
 }
 
 /**

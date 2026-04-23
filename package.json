@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "./build.js"
+    "build": "./build.js",
+    "build:private": "./build.js --private"
   },
   "type": "module",
   "homepage": "https://github.com/mauriziofonte/page-dump-bookmarklet",

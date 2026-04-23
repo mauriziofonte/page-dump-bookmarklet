@@ -29,8 +29,8 @@ export function run() {
         const htmlText = formatAsHtml(cleanedHtml, title)
         const txtText = formatAsText(text, title)
 
-        // Generate filename and show export options
-        const filename = generateFilename(title)
+        // Generate filename (parser hint wins over default)
+        const filename = extracted.filename || generateFilename(title)
         showExportOptions({ mdText, htmlText, txtText, filename })
     } catch (err) {
         showError(err.message || 'An unexpected error occurred')

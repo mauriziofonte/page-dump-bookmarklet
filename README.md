@@ -57,6 +57,25 @@ PageDump uses a hybrid approach inspired by Mozilla's Readability.js and custom 
 
     This command will bundle the code as a bookmarklet (via `esbuild-plugin-bookmarklet`) and create the `dist/pagedump.bookmarklet.js` minified bookmarklet file.
 
+## Personal / Private Builds
+
+The build script supports a second entry point for personal bundles that you don't want to ship publicly (e.g. parsers for sites you don't want to disclose, internal tooling, work-in-progress experiments).
+
+Convention:
+
+- Public entry: `index.js` → bundles to `dist/pagedump.bookmarklet.js`
+- Private entry: `index.private.js` → bundles to `dist/pagedump.bookmarklet.private.js`
+
+The `.gitignore` already excludes `index.private.js`, `dist/*.private.js`, and the `src/parsers/private/` directory. Drop your private parsers there, wire them up in `index.private.js`, and run:
+
+```bash
+npm run build:private
+```
+
+A private bundle can either extend the public flow (importing `src/parsers/private/index.js` to side-effect-register parsers via `registerParser`) or stand alone with its own UI/format pipeline if you need to keep the bundle smaller.
+
+The build script also reads an optional `.canary-private` file (gitignored): if present, it lists newline-separated strings that must NOT appear in the public bundle. Use it as a guard against accidental leaks of private identifiers, names, or domain strings into the public artifact.
+
 ## Development and Debugging
 
 1. Make your code changes in the `src/` directory.
@@ -79,7 +98,7 @@ This will execute your modified script in the context of the page, allowing you 
 src/
 ├── PageDump.js          # Main entry point and orchestration
 ├── ContentExtractor.js  # Hybrid content extraction algorithm
-├── DomainParsers.js     # Structured parsers for Stack Overflow, etc.
+├── DomainParsers.js     # Built-in parsers + registerParser/getDomainParser registry
 ├── HTMLCleaner.js       # HTML sanitization (preserves <a>, <img>)
 ├── OutputFormatter.js   # Markdown, HTML, and TXT formatters
 ├── UIManager.js         # Toast notifications for export options
@@ -102,6 +121,33 @@ The content extraction is controlled by constants in `src/ContentExtractor.js`:
 - `TAG_WEIGHTS`: Adjust scoring for different HTML tags.
 - `REGEX_POSITIVE` / `REGEX_NEGATIVE`: Patterns for class/ID matching.
 - `TAG_SCORE_BONUS` / `TAG_SCORE_MALUS`: Direct score modifiers per tag type.
+
+### Extending with Custom Parsers
+
+When the heuristic extractor isn't enough for a specific site (forums, ticket systems, structured content with stable selectors), you can register a **domain parser** that bypasses the algorithm and returns pre-structured HTML.
+
+A parser is a plain object exposing the following contract:
+
+```js
+{
+  name: 'my-site',
+  matches: (hostname) => /(^|\.)example\.com$/i.test(hostname),
+  parse: (root) => [/* array of structured items */],
+  toHtml: (items) => '<h1>...</h1>...',  // semantic HTML, fed into Turndown
+  filename: (items) => 'my-prefix-' + items[0].id,  // optional: overrides default filename
+}
+```
+
+Register it via the registry exported by `DomainParsers.js`:
+
+```js
+import { registerParser } from './src/DomainParsers.js'
+import { MyParser } from './src/parsers/my-parser.js'
+
+registerParser('example.com', MyParser)
+```
+
+When `getDomainParser(hostname)` finds a match, the structured pipeline runs first and short-circuits the heuristic extractor. The optional `filename(items)` method lets the parser supply a meaningful filename instead of the default `YYYYMMDD-HHMM-<title-slug>` format.
 
 ## Changelog
 

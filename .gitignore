@@ -3,3 +3,7 @@ node_modules/
 *-TEST.md
 .DS_Store
 *.log
+src/parsers/private/
+index.private.js
+dist/*.private.js
+.canary-private*
