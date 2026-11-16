@@ -24,6 +24,12 @@ await esbuild.build({
 const out = readFileSync(outfile, 'utf8')
 const bytes = Buffer.byteLength(out, 'utf8')
 
+// The bookmarklet plugin writes the file itself: an empty or non-bookmarklet file means it misbehaved.
+if (!out.startsWith('javascript:')) {
+    console.error('Build produced no bookmarklet: ' + outfile + ' (' + bytes + ' bytes)')
+    process.exit(1)
+}
+
 // Optional canary file (one needle per line) provided out-of-tree.
 // Used only for the public build; absent in clones that don't need it.
 if (!isPrivate && existsSync('.canary-private')) {

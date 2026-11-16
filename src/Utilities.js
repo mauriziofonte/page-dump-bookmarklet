@@ -26,12 +26,3 @@ export function generateFilename(title) {
     const slug = slugify(title, { lower: true, strict: true }) || 'page'
     return `${dateTime}-${slug}`
 }
-
-/**
- * Escapes a string for safe insertion into an HTML attribute.
- * @param {string} str - The string to escape.
- * @returns {string} The escaped string.
- */
-export function escapeHTML(str) {
-    return str.replace(/"/g, '&quot;')
-}

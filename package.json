@@ -23,12 +23,10 @@
   "license": "MIT",
   "description": "A browser bookmarklet to extract the main content from any web page and export it to Markdown, HTML, or plain text formats.",
   "dependencies": {
-    "copy-to-clipboard": "^3.3.3",
-    "esbuild": "^0.25.0",
-    "esbuild-plugin-bookmarklet": "^1.0.0",
-    "slugify": "^1.6.6",
-    "toastify-js": "^1.12.0",
-    "turndown": "^7.2.0",
+    "esbuild": "^0.28.2",
+    "esbuild-plugin-bookmarklet": "1.0.0",
+    "slugify": "^1.6.9",
+    "turndown": "^7.2.5",
     "turndown-plugin-gfm": "^1.0.2"
   }
 }
